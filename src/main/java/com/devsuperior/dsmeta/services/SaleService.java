@@ -34,14 +34,10 @@ public class SaleService {
 
 	@Transactional(readOnly = true)
 	public Page<SaleReportDTO> findReport(String minDate, String maxDate, String name, Pageable pageable) {
-
 		LocalDate today = LocalDate.ofInstant(Instant.now(), ZoneId.systemDefault());
-
-		// ternário
 		LocalDate max = maxDate.equals("") ? today : LocalDate.parse(maxDate);
 		LocalDate min = minDate.equals("") ? today.minusYears(1L) : LocalDate.parse(minDate);
-
-		// 1º retorno entity depois transfiro to list DTO
+		
 		Page<Sale> result = repository.searchReport(min, max, name, pageable);
 		Page<SaleReportDTO> dtos = result.map(x -> new SaleReportDTO(x));
 
@@ -50,29 +46,13 @@ public class SaleService {
 
 	@Transactional(readOnly = true)
 	public List<SaleSummaryDTO> findSummary(String minDate, String maxDate){
-		
-		LocalDate max = validMaxDate(maxDate);
-		LocalDate min = validMinDate(minDate);
+		LocalDate today = LocalDate.ofInstant(Instant.now(), ZoneId.systemDefault());
+		LocalDate max = maxDate.equals("") ? today : LocalDate.parse(maxDate);
+		LocalDate min = minDate.equals("") ? today.minusYears(1L) : LocalDate.parse(minDate);
 
 		List<SaleSummaryProjection> result = repository.searchSummary(min, max);
 		List<SaleSummaryDTO> dtos = result.stream().map(x -> new SaleSummaryDTO(x)).collect(Collectors.toList());
 		
 		return dtos;
-	}
-
-	// VALIDATOR
-	private LocalDate validMaxDate(String date){
-
-		LocalDate today = LocalDate.ofInstant(Instant.now(), ZoneId.systemDefault());
-		LocalDate valiDate = date.equals("") ? today : LocalDate.parse(date);
-		
-		return valiDate;
-	}
-
-	private LocalDate validMinDate(String date){
-		LocalDate today = LocalDate.ofInstant(Instant.now(), ZoneId.systemDefault());
-		LocalDate valiDate = date.equals("") ? today.minusYears(1L) : LocalDate.parse(date);
-
-		return valiDate;
 	}
 }
